@@ -9,10 +9,10 @@ class User {
 
     public function __construct($name, $username, $password) {
         global $servername, $dbusername, $dbpassword, $dbname;
+        $this->conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
         $this->name = $name;
         $this->username = $username;
         $this->password = $password;
-        $this->conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
     }
 
     public function __destruct() {
@@ -50,11 +50,13 @@ class User {
         $stmt = $conn->prepare("SELECT * FROM users WHERE username = ?");
         $stmt->bind_param("s", $username);
         $stmt->execute();
-        return $stmt->get_result()->num_rows > 0;
+        $result = $stmt->get_result();
+        $conn->close();
+        return $result->num_rows > 0;
     }
 
     public static function passwordMatches($username, $password) {
-        /* Returns if the password matches the username */
+        /* Returns user_id if the password matches the username */
         global $servername, $dbusername, $dbpassword, $dbname;
         // Connect to the database
         $conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
@@ -72,10 +74,11 @@ class User {
         // Check if the username exists
         if ($result->num_rows == 1) {
             $row = $result->fetch_assoc();
+            $conn->close();
             // Verify the hashed password
-            return password_verify($password, $row['password']);
+            return password_verify($password, $row['password'])? $row['id'] : null;
         } else {
-            return false;
+            return null;
         }
     }
 }
