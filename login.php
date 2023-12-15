@@ -1,48 +1,22 @@
 <?php
 session_start();
 
-require_once('database/config.php');
+require_once('models/User.php');
 
 $error_message = "";
 
 // Check if the form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Connect to the database
-    $conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
-    
-    // Check connection
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
-    }
     // Get the username and password from the form
-    $username = $_POST["username"] ?? "";
+    $username = trim($_POST["username"]) ?? "";
     $password = $_POST["password"] ?? "";
     
-    // Prepare and execute the SQL query
-    $stmt = $conn->prepare("SELECT * FROM users WHERE username = ?");
-    $stmt->bind_param("s", $username);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    // Check if the username exists
-    if ($result->num_rows == 1) {
-        $row = $result->fetch_assoc();
-        $hashedPassword = $row['password'];
-
-        // Verify the hashed password
-        if (password_verify($password, $hashedPassword)) {
-            $_SESSION["username"] = $username;
-            header("Location: index.php");
-        } else {
-            $error_message = "Invalid password.";
-        }
+    if (User::passwordMatches($username, $password)) {
+        $_SESSION["username"] = $username;
+        header("Location: index.php");
     } else {
-        $error_message = "Invalid username.";
+        $error_message = "Invalid username or password.";
     }
-
-    // Close the database connection
-    $stmt->close();
-    $conn->close();
 }
 ?>
 

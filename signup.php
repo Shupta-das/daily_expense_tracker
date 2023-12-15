@@ -1,38 +1,20 @@
 <?php
-require_once('database/config.php');
+require_once('models/User.php');
 
 $error_message = "";
 
 // Check if the form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Connect to the database
-    $conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
-
-    // Check connection
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
-    }
-
     // Get the values from the post form
-    $name = $_POST['name'];
-    $username = $_POST['username'];
+    $name = trim($_POST['name']);
+    $username = trim($_POST['username']);
     $password = $_POST['password'];
 
-    
-    // Check if the username already exists
-    $checkUsernameQuery = "SELECT * FROM users WHERE username = '$username'";
-    $checkUsernameResult = $conn->query($checkUsernameQuery);
-    
-    if ($checkUsernameResult->num_rows > 0) {
-        // Username already exists, ignore
+    if (User::userExists($username)) {
         $error_message = "Username already exists!";
     } else {
-        // Hash the password
-        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-        // Save the values to the database
-        $sql = "INSERT INTO users (name, username, password) VALUES ('$name', '$username', '$hashedPassword')";
-
-        if ($conn->query($sql) === TRUE) {
+        $user = new User($name, $username, $password);
+        if ($user->save()) {
             echo "
             <script>
                 if (window.confirm('Signup successful!'))
@@ -45,8 +27,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             die("Error: " . $conn->error);
         }
     }
-
-    $conn->close();
 }
 ?>
         
