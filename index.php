@@ -29,6 +29,8 @@ if (!isset($_SESSION["username"])) {
                 <br/>
                 
                 <div class="row justify-content-center">
+                    <div class="col-md-3"><a class="btn btn-block btn-outline-warning" href="category_form.php">Add a New Category</a></div>
+                    <div class="col-md-3"><a class="btn btn-block btn-outline-info" href="expense_form.php">Add a New Expense</a></div>
                     <div class="col-md-3"><a class="btn btn-block btn-outline-danger" href="logout.php">Logout</a></div>
                 </div>
 
