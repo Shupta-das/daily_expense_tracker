@@ -46,9 +46,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <button type="submit" class="btn btn-primary btn-block">Login</button>
                     </div>
                 </form>
-                <div class="text-center">
-                    <a href="signup.php">Sign Up</a>
+
+                <div class="text-center my-2">
+                    <a class="btn btn-outline-primary btn-block" href="signup.php">Sign Up</a>
                 </div>
+                
                 <div class="text-center">
                     <p class="text-danger"><?php echo $error_message; ?></p>
                 </div>

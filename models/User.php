@@ -81,5 +81,31 @@ class User {
             return null;
         }
     }
+
+    public static function getBudgetAndExpenseOfCategoriesByUser($user_id) {
+         /* Returns the budget and expense of categories for the user */
+         global $servername, $dbusername, $dbpassword, $dbname;
+         // Connect to the database
+         $conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
+ 
+         // Check connection
+         if ($conn->connect_error) {
+             die("Connection failed: " . $conn->connect_error);
+         }
+         // Prepare and execute the SQL query
+         $stmt = $conn->prepare("SELECT c.user_id, c.id AS category_id, c.name, c.budget, COALESCE(SUM(e.amount), 0) AS expense 
+                                    FROM categories c
+                                    LEFT JOIN expenses e ON e.category_id = c.id
+                                    WHERE c.user_id = ?
+                                    GROUP BY c.id
+                                    ORDER BY c.id");
+
+         $stmt->bind_param("s", $user_id);
+         $stmt->execute();
+         $result = $stmt->get_result();
+         
+         $conn->close();
+         return $result->fetch_all(MYSQLI_ASSOC);
+    }
 }
     

@@ -26,25 +26,17 @@ class Category {
             die("Connection failed: " . $this->conn->connect_error);
         }
         // Save the values to the database
-        $sql = "INSERT INTO categories (name, budget) VALUES ('$this->name', '$this->budget')";
+        $sql = "INSERT INTO categories (user_id, name, budget) VALUES ('$this->user_id', '$this->name', '$this->budget')";
         return $this->conn->query($sql);
     }
 
-    public static function getAllCategoriesByUser($user_id) {
-        /* Returns all categories for the user */
+    public static function getCategoriesByUser($user_id) {
+        /* Returns an array of categories for the given user */
         global $servername, $dbusername, $dbpassword, $dbname;
-        // Connect to the database
+        
         $conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
-
-        // Check connection
-        if ($conn->connect_error) {
-            die("Connection failed: " . $conn->connect_error);
-        }
-        // Prepare and execute the SQL query
-        $stmt = $conn->prepare("SELECT name, budget FROM categories WHERE user_id = ?");
-        $stmt->bind_param("s", $user_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $sql = "SELECT * FROM categories WHERE user_id = '$user_id'";
+        $result = $conn->query($sql);
         $conn->close();
         return $result->fetch_all(MYSQLI_ASSOC);
     }

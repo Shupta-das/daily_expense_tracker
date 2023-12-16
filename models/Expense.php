@@ -1,7 +1,5 @@
 <?php
 require_once('database/config.php');
-require_once('models/User.php');
-require_once('models/Category.php');
 
 class Expense {
     public $user_id;
@@ -13,7 +11,7 @@ class Expense {
     public $location;
     private $conn;
 
-    public function __construct($user_id, $amount, $category_id, $description=null, $date, $payment_method, $location=null) {
+    public function __construct($user_id, $amount, $category_id, $description, $date, $payment_method, $location) {
         global $servername, $dbusername, $dbpassword, $dbname;
         $this->conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
         $this->user_id = $user_id;
@@ -40,26 +38,6 @@ class Expense {
         return $this->conn->query($sql);
     }
 
-    public static function getTotalExpenseByUser($user_id) {
-        /* Returns the total expense for the user */
-        global $servername, $dbusername, $dbpassword, $dbname;
-        // Connect to the database
-        $conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
-
-        // Check connection
-        if ($conn->connect_error) {
-            die("Connection failed: " . $conn->connect_error);
-        }
-        // Prepare and execute the SQL query
-        $stmt = $conn->prepare("SELECT SUM(amount) AS amount FROM expenses WHERE user_id = ?");
-        $stmt->bind_param("s", $user_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $row = $result->fetch_assoc();
-        $conn->close();
-        return floatval($row['amount']);
-    }
-
     public static function getAllExpensesByUser($user_id) {
         /* Returns all the expenses for the user */
         global $servername, $dbusername, $dbpassword, $dbname;
@@ -75,26 +53,6 @@ class Expense {
         $stmt->bind_param("s", $user_id);
         $stmt->execute();
         $result = $stmt->get_result();
-        $conn->close();
-        return $result->fetch_all(MYSQLI_ASSOC);
-    }
-
-    public static function getExpenseOfCategoriesByUser($user_id) {
-        /* Returns the categories for the user */
-        global $servername, $dbusername, $dbpassword, $dbname;
-        // Connect to the database
-        $conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
-
-        // Check connection
-        if ($conn->connect_error) {
-            die("Connection failed: " . $conn->connect_error);
-        }
-        // Prepare and execute the SQL query
-        $stmt = $conn->prepare("SELECT b.name, SUM(a.amount) AS amount FROM expenses a INNER JOIN categories b ON a.category_id = b.id WHERE a.user_id = ? GROUP BY a.category_id");
-        $stmt->bind_param("s", $user_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
         $conn->close();
         return $result->fetch_all(MYSQLI_ASSOC);
     }

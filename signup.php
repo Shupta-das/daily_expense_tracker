@@ -24,7 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </script>
             ";
         } else {
-            die("Error: " . $conn->error);
+            die("Error: saving the data.");
         }
     }
 }
@@ -59,9 +59,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <button type="submit" class="btn btn-success btn-block">Signup</button>
                     </div>
                 </form>
-                <div class="text-center">
-                    <a href="login.php">Login</a>
+
+                <div class="text-center my-2">
+                    <a class="btn btn-outline-success btn-block" href="login.php">Login</a>
                 </div>
+                
                 <div class="text-center">
                     <p class="text-danger"><?php echo $error_message; ?></p>
                 </div>
