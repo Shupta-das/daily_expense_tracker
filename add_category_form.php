@@ -12,7 +12,7 @@ $error_message = "";
 
 // Check if the form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Get the cat. name and budget from the form
+    // Get the username and password from the form
     $name = trim($_POST["name"]);
     $budget = trim($_POST["budget"]);
     $user_id = $_SESSION["user_id"];
@@ -20,7 +20,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($budget < 0) {
         $error_message = "Budget cannot be negative.";
     } else {
-        $category = new Category($user_id, $name, $budget);
+        $category = new Category(null, $user_id, $name, $budget);
         if ($category->save()){
             echo "
                 <script>
@@ -49,9 +49,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="container">
         <div class="row justify-content-center m-4">
             <div class="col-md-6">
-                <h2 class="text-center">Expense Category</h2>
+                <h2 class="text-center">New Expense Category</h2>
                 
-                <form method="POST" action="category_form.php">
+                <form method="POST" action="add_category_form.php">
                     <div class="form-group">
                         <label for="name">Name</label>
                         <input type="text" class="form-control" id="name" name="name" placeholder="Enter category name (e.g. Groceries, Entertainment, Utilities)" required>

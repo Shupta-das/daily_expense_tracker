@@ -2,6 +2,7 @@
 require_once('database/config.php');
 
 class Expense {
+    public $expense_id;
     public $user_id;
     public $amount;
     public $category_id;
@@ -11,9 +12,10 @@ class Expense {
     public $location;
     private $conn;
 
-    public function __construct($user_id, $amount, $category_id, $description, $date, $payment_method, $location) {
+    public function __construct($expense_id=null, $user_id, $amount, $category_id, $description, $date, $payment_method, $location) {
         global $servername, $dbusername, $dbpassword, $dbname;
         $this->conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
+        $this->expense_id = $expense_id;
         $this->user_id = $user_id;
         $this->amount = $amount;
         $this->category_id = $category_id;
@@ -38,6 +40,17 @@ class Expense {
         return $this->conn->query($sql);
     }
 
+    public function update() {
+        /* Updates the expense in the database */
+        // Check connection
+        if ($this->conn->connect_error) {
+            die("Connection failed: " . $this->conn->connect_error);
+        }
+        // Update the values in the database
+        $sql = "UPDATE expenses SET amount='$this->amount', category_id='$this->category_id', description='$this->description', date='$this->date', payment_method='$this->payment_method', location='$this->location' WHERE id='$this->expense_id'";
+        return $this->conn->query($sql);
+    }
+
     public static function getAllExpensesByUser($user_id) {
         /* Returns all the expenses for the user */
         global $servername, $dbusername, $dbpassword, $dbname;
@@ -55,5 +68,41 @@ class Expense {
         $result = $stmt->get_result();
         $conn->close();
         return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    public static function getExpenseById($user_id, $expense_id) {
+        /* Returns the expense with the given id */
+        global $servername, $dbusername, $dbpassword, $dbname;
+        // Connect to the database
+        $conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
+
+        // Check connection
+        if ($conn->connect_error) {
+            die("Connection failed: " . $conn->connect_error);
+        }
+        // Prepare and execute the SQL query
+        $stmt = $conn->prepare("SELECT a.id, b.name AS category, a.amount, a.description, a.date, a.payment_method, a.location FROM expenses a INNER JOIN categories b ON a.category_id = b.id WHERE a.user_id = ? AND a.id = ?");
+        $stmt->bind_param("ss", $user_id, $expense_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $conn->close();
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    public static function deleteExpenseById($user_id, $expense_id) {
+        /* Deletes the expense with the given id */
+        global $servername, $dbusername, $dbpassword, $dbname;
+        // Connect to the database
+        $conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
+
+        // Check connection
+        if ($conn->connect_error) {
+            die("Connection failed: " . $conn->connect_error);
+        }
+        // Prepare and execute the SQL query
+        $sql = "DELETE FROM expenses WHERE user_id = '$user_id' AND id = '$expense_id'";
+        $result = $conn->query($sql);
+        $conn->close();
+        return $result;
     }
 }

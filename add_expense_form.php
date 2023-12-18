@@ -46,7 +46,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         ";
     } else {   
         // Create expense object
-        $expense = new Expense($_SESSION["user_id"], $amount, $category_id, $description, $date, $payment_method, $location);
+        $expense = new Expense(null, $_SESSION["user_id"], $amount, $category_id, $description, $date, $payment_method, $location);
         if ($expense->save()){
             echo "
             <script>
@@ -75,9 +75,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="container">
         <div class="row justify-content-center m-4">
             <div class="col-md-6">
-                <h2 class="text-center">Expense</h2>
+                <h2 class="text-center">Add Expense</h2>
                 
-                <form method="POST" action="expense_form.php">
+                <form method="POST" action="add_expense_form.php">
                     <div class="form-group">
                         <label for="category_id">Category</label>
                         <select class="form-control" id="category_id" name="category_id" required>
