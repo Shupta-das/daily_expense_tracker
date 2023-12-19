@@ -36,7 +36,7 @@ class User {
         return $this->conn->query($sql);
     }
 
-    public static function userExists($username) {
+    public static function getUserId($username) {
         /* Returns if the username exists */
         global $servername, $dbusername, $dbpassword, $dbname;
         // Connect to the database
@@ -52,7 +52,11 @@ class User {
         $stmt->execute();
         $result = $stmt->get_result();
         $conn->close();
-        return $result->num_rows > 0;
+        if ($result->num_rows > 0) {
+            return $result->fetch_assoc()['id'];
+        } else {
+            return null;
+        }
     }
 
     public static function passwordMatches($username, $password) {
@@ -82,7 +86,7 @@ class User {
         }
     }
 
-    public static function getBudgetAndExpenseOfCategoriesByUser($user_id) {
+    public static function getBudgetAndExpenseOfCategoriesByUser($user_id, $month_no) {
          /* Returns the budget and expense of categories for the user */
          global $servername, $dbusername, $dbpassword, $dbname;
          // Connect to the database
@@ -96,11 +100,11 @@ class User {
          $stmt = $conn->prepare("SELECT c.user_id, c.id AS category_id, c.name, c.budget, COALESCE(SUM(e.amount), 0) AS expense 
                                     FROM categories c
                                     LEFT JOIN expenses e ON e.category_id = c.id
-                                    WHERE c.user_id = ?
+                                    WHERE c.user_id = ? AND MONTH(c.date) = ?
                                     GROUP BY c.id
                                     ORDER BY c.id");
 
-         $stmt->bind_param("s", $user_id);
+         $stmt->bind_param("ss", $user_id, $month_no);
          $stmt->execute();
          $result = $stmt->get_result();
          

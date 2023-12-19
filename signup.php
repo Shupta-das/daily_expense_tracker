@@ -1,5 +1,7 @@
 <?php
 require_once('models/User.php');
+require_once('models/Category.php');
+require_once('models/MonthlyBudget.php');
 
 $error_message = "";
 
@@ -10,11 +12,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = trim($_POST['username']);
     $password = $_POST['password'];
 
-    if (User::userExists($username)) {
+    if (User::getUserId($username) != null) {
         $error_message = "Username already exists!";
     } else {
         $user = new User($name, $username, $password);
         if ($user->save()) {
+            // Set some default categories for the user
+            Category::setDefaultCategories(User::getUserId($username));
+            MonthlyBudget::setDefaultMonthlyBudgets(User::getUserId($username), 0);
+
             echo "
             <script>
                 if (window.confirm('Signup successful!'))

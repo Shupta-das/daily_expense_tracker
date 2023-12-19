@@ -20,6 +20,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET" and isset($_GET["user_id"]) and isset($_
     if ($category) {
         $name = $category["name"];
         $budget = $category["budget"];
+        $monthName = date("F", strtotime($category["date"]));
     } else {
         die("Error: category not found.");
     }
@@ -30,13 +31,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Get the username and password from the form
     $name = trim($_POST["name"]);
     $budget = trim($_POST["budget"]);
+    $date = date('Y-m-d', strtotime($_POST["month"] . ' 1'));
     $user_id = $_SESSION["user_id"];
     $category_id = $_POST["category_id"];
     
     if ($budget < 0) {
         $error_message = "Budget cannot be negative.";
     } else {
-        $category = new Category($category_id, $user_id, $name, $budget);
+        $category = new Category($category_id, $user_id, $name, $budget, $date);
         if ($category->update()){
             echo "
                 <script>
@@ -77,8 +79,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <label for="budget">Budget</label>
                         <input type="number" class="form-control" id="budget" name="budget" value="<?php echo $budget; ?>" placeholder="Enter category budget (e.g. $100)" required>
                     </div>
+                    <div class="form-group">
+                        <label for="month">Month</label>
+                        <select class="form-control" id="month" name="month" required>
+                            <?php
+                            for ($i = 1; $i <= 12; $i++) {
+                                $month = date("F", mktime(0, 0, 0, $i, 1));
+                                if ($month == $monthName) {
+                                    echo "<option value='$month' selected>$month</option>";
+                                } else {
+                                    echo "<option value='$month'>$month</option>";
+                                }
+                            } ?>
+                        </select>
                     <input type="hidden" id="category_id" name="category_id" value="<?php echo $category_id; ?>">
-                    <button type="submit" class="btn btn-warning btn-block">Submit</button>
+                    <button type="submit" class="btn my-2 btn-warning btn-block">Update</button>
                 </form>
 
                 <div class="text-center my-2">

@@ -26,8 +26,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $location = $_POST["location"];
     
     // Check if expense amount exceeds remaining budget
+    $budget_exists = false;
     $budget_exceeds = false;
-    $budgets = User::getBudgetAndExpenseOfCategoriesByUser($_SESSION["user_id"]);
+
+    $budgets = User::getBudgetAndExpenseOfCategoriesByUser($_SESSION["user_id"], date('n', strtotime($date)));
+    if ($budgets != null) {
+        $budget_exists = true;
+    }
     foreach ($budgets as $budget) {
         if ($budget['category_id'] == $category_id) {
             $remaining_budget = $budget['budget'] - $budget['expense'];
@@ -38,10 +43,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
+
     if ($budget_exceeds) {
         echo "
         <script>
             alert('Expense amount exceeds remaining budget');
+        </script>
+        ";
+    } else if ($budget_exists == false) {
+        echo "
+        <script>
+            alert('Please add the budget category for the given date first!');
         </script>
         ";
     } else {   

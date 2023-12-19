@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-// If user not looged in 
+// If user not logged in 
 if (!isset($_SESSION["username"])) {
     header("Location: login.php");
 }
@@ -15,12 +15,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Get the username and password from the form
     $name = trim($_POST["name"]);
     $budget = trim($_POST["budget"]);
+    $date = date('Y-m-d', strtotime($_POST["month"] . ' 1'));
     $user_id = $_SESSION["user_id"];
+
+    
     
     if ($budget < 0) {
         $error_message = "Budget cannot be negative.";
     } else {
-        $category = new Category(null, $user_id, $name, $budget);
+        $category = new Category(null, $user_id, $name, $budget, $date);
         if ($category->save()){
             echo "
                 <script>
@@ -59,6 +62,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <div class="form-group">
                         <label for="budget">Budget</label>
                         <input type="number" class="form-control" id="budget" name="budget" placeholder="Enter category budget (e.g. $100)" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="month">Month</label>
+                        <select class="form-control" id="month" name="month" required>
+                            <option value="January">January</option>
+                            <option value="February">February</option>
+                            <option value="March">March</option>
+                            <option value="April">April</option>
+                            <option value="May">May</option>
+                            <option value="June">June</option>
+                            <option value="July">July</option>
+                            <option value="August">August</option>
+                            <option value="September">September</option>
+                            <option value="October">October</option>
+                            <option value="November">November</option>
+                            <option value="December">December</option>
+                        </select>
                     </div>
                     <button type="submit" class="btn btn-warning btn-block">Submit</button>
                 </form>

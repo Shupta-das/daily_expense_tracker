@@ -50,11 +50,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $location = $_POST["location"];
     
     // Check if expense amount exceeds remaining budget
+    $budget_exists = false;
     $budget_exceeds = false;
-    $budgets = User::getBudgetAndExpenseOfCategoriesByUser($_SESSION["user_id"]);
+
+    $budgets = User::getBudgetAndExpenseOfCategoriesByUser($_SESSION["user_id"], date('n', strtotime($date)));
+    if ($budgets != null) {
+        $budget_exists = true;
+    }
     foreach ($budgets as $budget) {
         if ($budget['category_id'] == $category_id) {
-            $remaining_budget = $budget['budget'] - $budget['expense'];
+            $remaining_budget = $budget['budget'] - $budget['expense'] + $_POST["prev_expense"];
             if ($remaining_budget < $amount) {
                 $budget_exceeds = true;
                 break;
@@ -68,13 +73,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             alert('Expense amount exceeds remaining budget');
         </script>
         ";
+    } else if ($budget_exists == false) {
+        echo "
+        <script>
+            alert('Please add the budget category for the given date first!');
+        </script>
+        ";
     } else {   
         // Create expense object
         $expense = new Expense($expense_id, $_SESSION["user_id"], $amount, $category_id, $description, $date, $payment_method, $location);
         if ($expense->update()){
             echo "
             <script>
-            if (window.confirm('Data updated successfully!'))
+            if (window.confirm('Data saved successfully!'))
             {
                 window.location.href = 'index.php';
             }
@@ -135,7 +146,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <input type="text" class="form-control" id="location" name="location" value="<?php echo $location; ?>" placeholder="Enter location" required>
                     </div>
                     <input type="hidden" id="expense_id" name="expense_id" value="<?php echo $expense_id; ?>">
-                    <button type="submit" class="btn btn-info btn-block">Submit</button>
+                    <input type="hidden" id="prev_expense" name="prev_expense" value="<?php echo $amount; ?>">
+                    <button type="submit" class="btn btn-info btn-block">Update</button>
                 </form>
 
                 <div class="text-center my-2">

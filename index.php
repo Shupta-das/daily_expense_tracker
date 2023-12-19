@@ -1,6 +1,7 @@
 <?php
 require_once('models/Expense.php');
 require_once('models/User.php');
+require_once('models/MonthlyBudget.php');
 
 session_start();
 
@@ -8,6 +9,23 @@ session_start();
 if (!isset($_SESSION["username"])) {
     header("Location: login.php");
 }
+
+// Set current month as default
+$month_no = date('m');
+
+// Or get month no. from the URL
+if (isset($_GET["month"])) {
+    if ($_GET["month"] < 1) {
+        $month_no = 12;
+    } else if ($_GET["month"] > 12) {
+        $month_no = 1;
+    } else {
+        $month_no = $_GET["month"];
+    }
+}
+
+$monthly_total_budget = MonthlyBudget::getTotalBudgetByUserAndMonth($_SESSION['user_id'], $month_no);
+$remaining_total_budget = $monthly_total_budget - Expense::getTotalExpensesByUserAndMonth($_SESSION['user_id'], $month_no);
 
 ?>
 
@@ -27,16 +45,68 @@ if (!isset($_SESSION["username"])) {
                 <h2 class="text-center">Welcome, <?php echo $_SESSION["username"]; ?></h2>
                 
                 <br/>
+                <div class="row">
+                    <div class="col-md-9">
+                        <h3>Monthly Budget of <b><?php echo date("F", mktime(0, 0, 0, $month_no, 1)) . ": " . number_format($monthly_total_budget, 2); ?></b></h3>
+                    </div>
+                    <div class="col-md-3">
+                        <a class="btn btn-block btn-outline-success" href="<?php echo "update_monthly_budget_form.php?user_id=". $_SESSION['user_id'] . "&month_no=" . $month_no; ?>">Edit Budget</a>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-9">
+                        <h3>Remaining budget for <b><?php echo date("F", mktime(0, 0, 0, $month_no, 1)) . ": " . number_format($remaining_total_budget, 2); ?></b></h3>
+                    </div>
+                </div>
+
+                <br/>
                 
                 <div class="row justify-content-center">
                     <div class="col-md-3"><a class="btn btn-block btn-outline-warning" href="add_category_form.php">Add a New Category</a></div>
                     <div class="col-md-3"><a class="btn btn-block btn-outline-info" href="add_expense_form.php">Add a New Expense</a></div>
                     <div class="col-md-3"><a class="btn btn-block btn-outline-danger" href="logout.php">Logout</a></div>
                 </div>
-
+                
                 <br/>
 
-                <h3>Budget and Expense by Category:</h3>
+                <form action="index.php" method="GET" >
+                    <div class="row justify-content-center">
+                        <div class="col-md-3"><button type="submit" name="month" value="<?php echo $month_no - 1; ?>" class="btn btn-block btn-outline-dark" >Previous Month</button></div>
+                        <div class="col-md-3"><a href="detailed_report.php" class="btn btn-block btn-outline-primary" >Detailed Report</a></div>
+                        <div class="col-md-3"><button type="submit" name="month" value="<?php echo $month_no + 1; ?>" class="btn btn-block btn-outline-dark" >Next Month</button></div>
+                    </div>
+                </form>
+                <br/>
+                <form action="index.php" method="GET" >
+                    <div class="row justify-content-center">
+                        <div class="col-md-4">
+                            <select class="form-control text-center" name="month">
+                                <option value="">---SELECT A MONTH---</option>
+                                <option value="1">January</option>
+                                <option value="2">February</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-block btn-outline-dark" >Go</button>
+                        </div>
+                    </div>
+                </form>
+                <br/>
+
+                
+
+                <h3 class="text-center">Budget and Expense of <b><?php echo date("F", mktime(0, 0, 0, $month_no, 1)); ?></b></h3>
                 <table class="table table-striped text-center">
                     <thead>
                         <tr>
@@ -50,7 +120,7 @@ if (!isset($_SESSION["username"])) {
                     </thead>
                     <tbody>
                         <?php
-                        $budgets = User::getBudgetAndExpenseOfCategoriesByUser($_SESSION["user_id"]);
+                        $budgets = User::getBudgetAndExpenseOfCategoriesByUser($_SESSION["user_id"], $month_no);
                         $total_budget = 0;
                         $total_expense = 0;
                         $remaining_budget = 0;
@@ -80,7 +150,7 @@ if (!isset($_SESSION["username"])) {
                 </table>
                 <br/>
 
-                <h3>All Expenses:</h3>
+                <h3 class="text-center">All Expenses of <b><?php echo date("F", mktime(0, 0, 0, $month_no, 1)); ?></b></h3>
                 <table class="table table-striped text-center">
                     <thead>
                         <tr>
@@ -97,7 +167,7 @@ if (!isset($_SESSION["username"])) {
                     </thead>
                     <tbody>
                         <?php
-                        $expenses = Expense::getAllExpensesByUser($_SESSION["user_id"]);
+                        $expenses = Expense::getAllExpensesByUser($_SESSION["user_id"], $month_no);
                         foreach ($expenses as $expense) {
                             echo "<tr>";
                             echo "<td>" . $expense['id'] . "</td>";
