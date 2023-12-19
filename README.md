@@ -35,7 +35,7 @@ Before you begin, ensure you have the following installed:
     $dbusername = "root";
     $dbpassword = "";
     $dbname = "expense_tracker";
-4. Open your web browser and navigate to `http://localhost/expense-tracker`.
+4. Open your web browser and navigate to `http://localhost/daily_expense_tracker`.
 
 ## Project Structure
 ![ERD](data/erd.png)
