@@ -1,7 +1,7 @@
 <?php
 $servername = "localhost";
 $dbusername = "root";
-$dbpassword = "";
+$dbpassword = "Shupta@";
 $dbname = "expense_tracker";
 
 // Connect to the database
